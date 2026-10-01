@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kết quả Minigame K12</title>
+  <meta name="description" content="Nhấn vào để biết bạn có nằm trong Top 100 trả lời đúng sớm nhất minigame Giải mã dàn khách mời K12 không!">
+
+  <!-- Thẻ chia sẻ Facebook: sau khi đưa lên host, thay DOMAIN bằng địa chỉ thật -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://DOMAIN/">
+  <meta property="og:title" content="🏁 Bạn có lọt Top 100? – Kết quả Minigame K12">
+  <meta property="og:description" content="Đáp án: Jaykii & Bevis. Nhấn vào, nhập tên Facebook của bạn và xem bạn về đích hạng mấy!">
+  <meta property="og:image" content="https://DOMAIN/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;800;900&display=swap" rel="stylesheet">
+  <link rel="preload" href="data.json" as="fetch" crossorigin>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <canvas id="confetti" aria-hidden="true"></canvas>
+
+  <header class="hero">
+    <div class="flag-strip" aria-hidden="true"></div>
+    <div class="logos">
+      <img src="img/logo-doan.png" alt="Đoàn TNCS Hồ Chí Minh" width="72" height="72">
+      <img src="img/logo-truong.png" alt="Trường Đại học Hạ Long" width="72" height="72">
+    </div>
+    <p class="eyebrow">Tuổi trẻ Trường ĐH Hạ Long</p>
+    <h1>Giải mã dàn khách mời <span class="k12">K12</span></h1>
+    <p class="answer">Đáp án: <b>01 – Jaykii</b> · <b>02 – Bevis</b></p>
+    <div class="stats" id="stats"></div>
+  </header>
+
+  <main>
+    <section class="card search-card" id="search">
+      <h2>🏁 Bạn có lọt Top 100?</h2>
+      <p class="hint">Nhập tên Facebook hoặc dán link trang cá nhân của bạn</p>
+      <form id="searchForm" autocomplete="off">
+        <input id="q" type="search" placeholder="VD: Hoài Hoài  hoặc  facebook.com/ten.ban" aria-label="Tên hoặc link Facebook">
+        <button type="submit">Xuất phát!</button>
+      </form>
+      <ul id="matches" class="matches"></ul>
+    </section>
+
+    <section class="card race-card hidden" id="raceCard" aria-live="polite">
+      <div class="stage" id="stage">
+        <div class="counter" id="counter"></div>
+      </div>
+      <div class="result" id="result"></div>
+    </section>
+
+    <section class="card board-card hidden" id="boardCard">
+      <h2>🏆 Bảng vàng Top 100</h2>
+      <div class="podium" id="podium"></div>
+      <input id="boardFilter" class="filter" type="search" placeholder="Lọc trong bảng vàng…" aria-label="Lọc bảng vàng">
+      <ol class="board" id="board"></ol>
+    </section>
+  </main>
+
+  <footer>
+    <p class="made">✨ Sản phẩm được tạo ra bởi <b>AI</b> và <b>Khoa Công nghệ Thông tin</b> – Trường Đại học Hạ Long</p>
+    <p>Mỗi tài khoản chỉ tính bình luận đúng đầu tiên · Thời gian ước tính theo hiển thị Facebook (±1 giờ)</p>
+  </footer>
+
+  <div class="toast" id="toast" role="status"></div>
+  <script src="app.js" defer></script>
+</body>
+</html>
