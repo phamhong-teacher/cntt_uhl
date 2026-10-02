@@ -78,7 +78,7 @@
       ul.innerHTML = `<li class="empty">Không tìm thấy “${esc(q)}”. Thử nhập đúng tên Facebook hoặc dán link trang cá nhân nhé.</li>`;
       return;
     }
-    if (list.length === 1) { ul.innerHTML = ""; runRace(list[0]); return; }
+    if (list.length === 1) { ul.innerHTML = ""; $("#q").value = ""; runRace(list[0]); return; }
     ul.innerHTML = list.map((p) =>
       `<li><button type="button" data-slug="${esc(p.slug)}">${esc(p.name)} <small>fb.com/${esc(p.slug)}</small></button></li>`
     ).join("");
@@ -139,7 +139,6 @@
   async function runRace(p) {
     const token = ++raceToken;
     const alive = () => token === raceToken;
-    history.replaceState(null, "", `?u=${encodeURIComponent(p.slug)}`);
 
     $("#boardCard").classList.add("hidden");
     $("#result").innerHTML = "";
@@ -279,6 +278,16 @@
     })(performance.now());
   }
 
+  function showFriend(p) {
+    const verdict = p.rank && p.rank <= DATA.winners
+      ? `đã lọt <b>Top ${DATA.winners}</b> với hạng <b>#${p.rank}</b> 🏆`
+      : p.rank ? `về hạng <b>#${p.rank}</b>, chỉ tiếc chưa lọt Top ${DATA.winners}` : "đã thử vận may";
+    const box = $("#friend");
+    box.innerHTML = `<b>${esc(p.name)}</b> ${verdict}. Đến lượt bạn – nhập tên của bạn bên dưới!
+      <button type="button" class="ghost" data-slug="${esc(p.slug)}">Xem hiệu ứng của ${esc(p.name)}</button>`;
+    box.classList.remove("hidden");
+  }
+
   // ---------- Sự kiện ----------
   function bind() {
     $("#searchForm").addEventListener("submit", (e) => {
@@ -288,11 +297,15 @@
     });
     $("#matches").addEventListener("click", (e) => {
       const b = e.target.closest("button[data-slug]");
-      if (b) { $("#matches").innerHTML = ""; runRace(bySlug.get(b.dataset.slug)); }
+      if (b) { $("#matches").innerHTML = ""; $("#q").value = ""; runRace(bySlug.get(b.dataset.slug)); }
     });
     $("#board").addEventListener("click", (e) => {
       const li = e.target.closest("li[data-slug]");
       if (li) runRace(bySlug.get(li.dataset.slug));
+    });
+    $("#friend").addEventListener("click", (e) => {
+      const b = e.target.closest("button[data-slug]");
+      if (b) runRace(bySlug.get(b.dataset.slug));
     });
     $("#boardFilter").addEventListener("input", (e) => renderBoard(e.target.value));
     $("#result").addEventListener("click", async (e) => {
@@ -324,12 +337,13 @@
     renderStats();
     renderPodium();
 
-    // Link kết quả riêng (?u=<fb id>) hoặc ?q=<tên>: điền sẵn tên và chạy hiệu ứng
-    const params = new URLSearchParams(location.search);
-    const u = params.get("u");
-    const q = params.get("q");
-    const me = u && bySlug.get(u.toLowerCase());
-    if (me) { $("#q").value = me.name; runRace(me); }
-    else if (q) { $("#q").value = q; showMatches(search(q), q); }
+    // Mở từ link bạn bè chia sẻ (?u=<fb id>): chỉ giới thiệu kết quả của họ,
+    // ô tên luôn để trống để người vào tự nhập tên mình.
+    const u = new URLSearchParams(location.search).get("u");
+    const friend = u && bySlug.get(u.toLowerCase());
+    if (friend) showFriend(friend);
+    if (location.search) history.replaceState(null, "", location.pathname);
+    $("#q").value = "";
+    $("#q").focus({ preventScroll: true });
   })();
 })();

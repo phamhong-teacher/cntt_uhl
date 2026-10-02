@@ -72,6 +72,12 @@ footer .made {
 footer .made b { color: var(--gold); }
 
 /* ---------- Search ---------- */
+.friend {
+  margin: 4px 0 12px; padding: 12px 14px; border-radius: 12px; font-size: 14px; line-height: 1.5;
+  background: rgba(255, 204, 51, .1); border: 1px solid rgba(255, 204, 51, .4);
+}
+.friend b { color: var(--gold); }
+.friend button { display: block; margin-top: 8px; }
 form { display: flex; gap: 8px; }
 input[type=search] {
   flex: 1; min-width: 0; font: inherit; font-size: 16px; color: var(--text);
