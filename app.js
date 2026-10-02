@@ -4,6 +4,7 @@
   const $ = (s) => document.querySelector(s);
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+  const BOARD_SIZE = 50; // bảng vàng chỉ công khai Top 50; từ hạng 51 phải tra đúng tên mới thấy
   let DATA, people, winners, bySlug;
   let raceToken = 0;
 
@@ -69,17 +70,58 @@
     const k = norm(q);
     const exact = people.filter((p) => p.key === k);
     if (exact.length) return exact;
-    return people.filter((p) => p.key.includes(k)).slice(0, 20);
+    // Tìm gần đúng: chấm điểm từng người, lấy tối đa 10 gợi ý (chỉ hiện tên, không lộ hạng)
+    return people
+      .map((p) => ({ p, s: score(k, p.key) }))
+      .filter((x) => x.s > 0)
+      .sort((a, b) => b.s - a.s)
+      .slice(0, 10)
+      .map((x) => x.p);
+  }
+
+  function lev(a, b) {
+    const row = Array.from({ length: b.length + 1 }, (_, i) => i);
+    for (let i = 1; i <= a.length; i++) {
+      let prev = row[0];
+      row[0] = i;
+      for (let j = 1; j <= b.length; j++) {
+        const tmp = row[j];
+        row[j] = Math.min(row[j] + 1, row[j - 1] + 1, prev + (a[i - 1] === b[j - 1] ? 0 : 1));
+        prev = tmp;
+      }
+    }
+    return row[b.length];
+  }
+
+  // Một từ gõ vào khớp một từ trong tên: trùng, là đầu của từ, hoặc sai tối đa 1 chữ (từ ≥ 4 chữ)
+  function wordHit(w, words) {
+    if (words.includes(w)) return 3;
+    if (words.some((x) => x.startsWith(w))) return 2;
+    if (w.length >= 4 && words.some((x) => Math.abs(x.length - w.length) <= 1 && lev(w, x) <= 1)) return 1;
+    return 0;
+  }
+
+  function score(k, key) {
+    const qs = k.split(" ");
+    const words = key.split(" ");
+    if (key.includes(k)) {
+      const whole = qs.every((w) => words.includes(w)) ? 20 : 0; // trùng nguyên từ được ưu tiên
+      return 100 + whole - (key.length - k.length) * 0.1;
+    }
+    const hits = qs.map((w) => wordHit(w, words));
+    if (hits.every((h) => h)) return 50 + hits.reduce((a, b) => a + b, 0);       // đủ mọi từ, không cần đúng thứ tự
+    if (k.length >= 5 && lev(k, key) <= Math.max(1, Math.floor(k.length / 5))) return 40; // gõ sai vài chữ
+    return 0;
   }
 
   function showMatches(list, q) {
     const ul = $("#matches");
     if (!list.length) {
-      ul.innerHTML = `<li class="empty">Không tìm thấy “${esc(q)}”. Thử nhập đúng tên Facebook hoặc dán link trang cá nhân nhé.</li>`;
+      ul.innerHTML = `<li class="empty">Không tìm thấy “${esc(q)}”. Thử nhập tên Facebook của bạn (không cần dấu) hoặc dán link trang cá nhân nhé.</li>`;
       return;
     }
-    if (list.length === 1) { ul.innerHTML = ""; $("#q").value = ""; runRace(list[0]); return; }
-    ul.innerHTML = list.map((p) =>
+    if (list.length === 1 && list[0].key === norm(q)) { ul.innerHTML = ""; $("#q").value = ""; runRace(list[0]); return; }
+    ul.innerHTML = `<li class="empty">Có phải bạn là…?</li>` + list.map((p) =>
       `<li><button type="button" data-slug="${esc(p.slug)}">${esc(p.name)} <small>fb.com/${esc(p.slug)}</small></button></li>`
     ).join("");
   }
@@ -244,7 +286,8 @@
 
   function renderBoard(filter = "") {
     const k = norm(filter);
-    const list = k ? winners.filter((p) => p.key.includes(k)) : winners;
+    const top = winners.slice(0, BOARD_SIZE);
+    const list = k ? top.filter((p) => p.key.includes(k)) : top;
     $("#board").innerHTML = list.map((p, i) =>
       `<li data-slug="${esc(p.slug)}" style="animation-delay:${Math.min(i, 40) * 15}ms"><span class="n">#${p.rank}</span><span>${esc(p.name)}</span></li>`
     ).join("") || `<li>Không có ai khớp “${esc(filter)}”</li>`;
